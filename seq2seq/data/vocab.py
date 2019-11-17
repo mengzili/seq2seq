@@ -21,6 +21,7 @@ from __future__ import print_function
 import collections
 import tensorflow as tf
 from tensorflow import gfile
+from tensorflow.python.ops import lookup_ops
 
 SpecialVocab = collections.namedtuple("SpecialVocab",
                                       ["UNK", "SEQUENCE_START", "SEQUENCE_END"])
@@ -106,19 +107,19 @@ def create_vocabulary_lookup_table(filename, default_value=None):
   vocab_idx_tensor = tf.range(vocab_size, dtype=tf.int64)
 
   # Create ID -> word mapping
-  id_to_vocab_init = tf.contrib.lookup.KeyValueTensorInitializer(
+  id_to_vocab_init = lookup_ops.KeyValueTensorInitializer(
       vocab_idx_tensor, vocab_tensor, tf.int64, tf.string)
-  id_to_vocab_table = tf.contrib.lookup.HashTable(id_to_vocab_init, "UNK")
+  id_to_vocab_table = lookup_ops.HashTable(id_to_vocab_init, "UNK")
 
   # Create word -> id mapping
-  vocab_to_id_init = tf.contrib.lookup.KeyValueTensorInitializer(
+  vocab_to_id_init = lookup_ops.KeyValueTensorInitializer(
       vocab_tensor, vocab_idx_tensor, tf.string, tf.int64)
-  vocab_to_id_table = tf.contrib.lookup.HashTable(vocab_to_id_init,
+  vocab_to_id_table = lookup_ops.HashTable(vocab_to_id_init,
                                                   default_value)
 
   # Create word -> count mapping
-  word_to_count_init = tf.contrib.lookup.KeyValueTensorInitializer(
+  word_to_count_init = lookup_ops.KeyValueTensorInitializer(
       vocab_tensor, count_tensor, tf.string, tf.float32)
-  word_to_count_table = tf.contrib.lookup.HashTable(word_to_count_init, -1)
+  word_to_count_table = lookup_ops.HashTable(word_to_count_init, -1)
 
   return vocab_to_id_table, id_to_vocab_table, word_to_count_table, vocab_size
