@@ -41,12 +41,12 @@ FLAGS = tf.flags.FLAGS
 
 
 @six.add_metaclass(abc.ABCMeta)
-class TrainingHook(tf.train.SessionRunHook, Configurable):
+class TrainingHook(tf.estimator.SessionRunHook, Configurable):
   """Abstract base class for training hooks.
   """
 
   def __init__(self, params, model_dir, run_config):
-    tf.train.SessionRunHook.__init__(self)
+    tf.estimator.SessionRunHook.__init__(self)
     Configurable.__init__(self, params, tf.contrib.learn.ModeKeys.TRAIN)
     self._model_dir = model_dir
     self._run_config = run_config
@@ -90,17 +90,17 @@ class MetadataCaptureHook(TrainingHook):
     return {"step": 10}
 
   def begin(self):
-    self._global_step = tf.train.get_global_step()
+    self._global_step = tf.compat.v1.train.get_global_step()
 
   def before_run(self, _run_context):
     if not self.is_chief or self._done:
       return
     if not self._active:
-      return tf.train.SessionRunArgs(self._global_step)
+      return tf.estimator.SessionRunArgs(self._global_step)
     else:
-      tf.logging.info("Performing full trace on next step.")
-      run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE) #pylint: disable=E1101
-      return tf.train.SessionRunArgs(self._global_step, options=run_options)
+      tf.compat.v1.logging.info("Performing full trace on next step.")
+      run_options = tf.compat.v1.RunOptions(trace_level=tf.compat.v1.RunOptions.FULL_TRACE) #pylint: disable=E1101
+      return tf.estimator.SessionRunArgs(self._global_step, options=run_options)
 
   def after_run(self, _run_context, run_values):
     if not self.is_chief or self._done:
@@ -108,7 +108,7 @@ class MetadataCaptureHook(TrainingHook):
 
     step_done = run_values.results
     if self._active:
-      tf.logging.info("Captured full trace at step %s", step_done)
+      tf.compat.v1.logging.info("Captured full trace at step %s", step_done)
       # Create output directory
       gfile.MakeDirs(self._output_dir)
 
@@ -116,7 +116,7 @@ class MetadataCaptureHook(TrainingHook):
       trace_path = os.path.join(self._output_dir, "run_meta")
       with gfile.GFile(trace_path, "wb") as trace_file:
         trace_file.write(run_values.run_metadata.SerializeToString())
-        tf.logging.info("Saved run_metadata to %s", trace_path)
+        tf.compat.v1.logging.info("Saved run_metadata to %s", trace_path)
 
       # Save timeline
       timeline_path = os.path.join(self._output_dir, "timeline.json")
@@ -124,14 +124,14 @@ class MetadataCaptureHook(TrainingHook):
         tl_info = timeline.Timeline(run_values.run_metadata.step_stats)
         tl_chrome = tl_info.generate_chrome_trace_format(show_memory=True)
         timeline_file.write(tl_chrome)
-        tf.logging.info("Saved timeline to %s", timeline_path)
+        tf.compat.v1.logging.info("Saved timeline to %s", timeline_path)
 
       # Save tfprof op log
       tf.contrib.tfprof.tfprof_logger.write_op_log(
-          graph=tf.get_default_graph(),
+          graph=tf.compat.v1.get_default_graph(),
           log_dir=self._output_dir,
           run_meta=run_values.run_metadata)
-      tf.logging.info("Saved op log to %s", self._output_dir)
+      tf.compat.v1.logging.info("Saved op log to %s", self._output_dir)
       self._active = False
       self._done = True
 
@@ -176,7 +176,7 @@ class TrainSampleHook(TrainingHook):
 
   def begin(self):
     self._iter_count = 0
-    self._global_step = tf.train.get_global_step()
+    self._global_step = tf.compat.v1.train.get_global_step()
     self._pred_dict = graph_utils.get_dict_from_collection("predictions")
     # Create the sample directory
     if self._sample_dir is not None:
@@ -190,8 +190,8 @@ class TrainSampleHook(TrainingHook):
           "target_words": self._pred_dict["labels.target_tokens"],
           "target_len": self._pred_dict["labels.target_len"]
       }
-      return tf.train.SessionRunArgs([fetches, self._global_step])
-    return tf.train.SessionRunArgs([{}, self._global_step])
+      return tf.estimator.SessionRunArgs([fetches, self._global_step])
+    return tf.estimator.SessionRunArgs([{}, self._global_step])
 
   def after_run(self, _run_context, run_values):
     result_dict, step = run_values.results
@@ -218,7 +218,7 @@ class TrainSampleHook(TrainingHook):
       result_str += self._target_delimiter.encode("utf-8").join(
           target_slice).decode("utf-8") + "\n\n"
     result_str += ("=" * 100) + "\n\n"
-    tf.logging.info(result_str)
+    tf.compat.v1.logging.info(result_str)
     if self._sample_dir:
       filepath = os.path.join(self._sample_dir,
                               "samples_{:06d}.txt".format(step))
@@ -246,11 +246,11 @@ class PrintModelAnalysisHook(TrainingHook):
       opts = tf.contrib.tfprof.model_analyzer.TRAINABLE_VARS_PARAMS_STAT_OPTIONS
       opts['dump_to_file'] = os.path.abspath(self._filename)
       tf.contrib.tfprof.model_analyzer.print_model_analysis(
-          tf.get_default_graph(), tfprof_options=opts)
+          tf.compat.v1.get_default_graph(), tfprof_options=opts)
 
     # Print the model analysis
     with gfile.GFile(self._filename) as file:
-      tf.logging.info(file.read())
+      tf.compat.v1.logging.info(file.read())
 
 
 class VariableRestoreHook(TrainingHook):
@@ -282,18 +282,18 @@ class VariableRestoreHook(TrainingHook):
     target_names = [varname_in_checkpoint(_.op.name) for _ in variables]
     restore_map = {k: v for k, v in zip(target_names, variables)}
 
-    tf.logging.info("Restoring variables: \n%s",
+    tf.compat.v1.logging.info("Restoring variables: \n%s",
                     yaml.dump({k: v.op.name
                                for k, v in restore_map.items()}))
 
-    self._saver = tf.train.Saver(restore_map)
+    self._saver = tf.compat.v1.train.Saver(restore_map)
 
   def after_create_session(self, session, coord):
     self._saver.restore(session, self.params["checkpoint_path"])
-    tf.logging.info("Successfully restored all variables")
+    tf.compat.v1.logging.info("Successfully restored all variables")
 
 
-class DelayStartHook(TrainingHook, tf.train.GlobalStepWaiterHook):
+class DelayStartHook(TrainingHook, tf.estimator.GlobalStepWaiterHook):
   """Delays the start of the current worker process until global step
   K * task_id is reached. K is a parameter.
   """
@@ -302,7 +302,7 @@ class DelayStartHook(TrainingHook, tf.train.GlobalStepWaiterHook):
     self._task_id = self._run_config.task_id
     self._delay_k = self.params["delay_k"]
     self._wait_until_step = int(self._delay_k * self._task_id)
-    tf.train.GlobalStepWaiterHook.__init__(self, self._wait_until_step)
+    tf.estimator.GlobalStepWaiterHook.__init__(self, self._wait_until_step)
 
   @staticmethod
   def default_params():
@@ -357,7 +357,7 @@ class SyncReplicasOptimizerHook(TrainingHook):
     if not self._sync_optimizer:
       return
 
-    tf.logging.info("Found SyncReplicasOptimizer. Initializing.")
+    tf.compat.v1.logging.info("Found SyncReplicasOptimizer. Initializing.")
 
     local_init_success, msg = session_manager._ready(  # pylint: disable=protected-access
         self._ready_for_local_init_op, session,

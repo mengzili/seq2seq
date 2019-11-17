@@ -81,14 +81,14 @@ class TestTextMetricSpec(tf.test.TestCase):
 
   def _test_metric_spec(self, metric_spec, hyps, refs, expected_scores):
     """Tests a MetricSpec"""
-    predictions = {"predicted_tokens": tf.placeholder(dtype=tf.string)}
-    labels = {"target_tokens": tf.placeholder(dtype=tf.string)}
+    predictions = {"predicted_tokens": tf.compat.v1.placeholder(dtype=tf.string)}
+    labels = {"target_tokens": tf.compat.v1.placeholder(dtype=tf.string)}
 
     value, update_op = metric_spec.create_metric_ops(None, labels, predictions)
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      sess.run(tf.local_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
+      sess.run(tf.compat.v1.local_variables_initializer())
 
       scores = []
       for hyp, ref in zip(hyps, refs):

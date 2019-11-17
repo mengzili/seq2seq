@@ -39,10 +39,10 @@ class BridgeTest(tf.test.TestCase):
   def setUp(self):
     super(BridgeTest, self).setUp()
     self.batch_size = 4
-    self.encoder_cell = tf.contrib.rnn.MultiRNNCell(
-        [tf.contrib.rnn.GRUCell(4), tf.contrib.rnn.GRUCell(8)])
-    self.decoder_cell = tf.contrib.rnn.MultiRNNCell(
-        [tf.contrib.rnn.LSTMCell(16), tf.contrib.rnn.GRUCell(8)])
+    self.encoder_cell = tf.compat.v1.nn.rnn_cell.MultiRNNCell(
+        [tf.compat.v1.nn.rnn_cell.GRUCell(4), tf.compat.v1.nn.rnn_cell.GRUCell(8)])
+    self.decoder_cell = tf.compat.v1.nn.rnn_cell.MultiRNNCell(
+        [tf.compat.v1.nn.rnn_cell.LSTMCell(16), tf.compat.v1.nn.rnn_cell.GRUCell(8)])
     final_encoder_state = nest.map_structure(
         lambda x: tf.convert_to_tensor(
             value=np.random.randn(self.batch_size, x),
@@ -70,12 +70,12 @@ class BridgeTest(tf.test.TestCase):
     """Runs the bridge with the given arguments
     """
 
-    with tf.variable_scope(scope or "bridge"):
+    with tf.compat.v1.variable_scope(scope or "bridge"):
       bridge = self._create_bridge(**kwargs)
       initial_state = bridge()
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       initial_state_ = sess.run(initial_state)
 
     return initial_state_

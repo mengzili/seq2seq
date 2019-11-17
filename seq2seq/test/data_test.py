@@ -104,8 +104,8 @@ class ParallelDataProviderTest(tf.test.TestCase):
         set(["source_tokens", "source_len", "target_tokens", "target_len"]))
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      sess.run(tf.local_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
+      sess.run(tf.compat.v1.local_variables_initializer())
       with tf.contrib.slim.queues.QueueRunners(sess):
         item_dicts_ = [sess.run(items_dict) for _ in range(num_epochs * 3)]
 
@@ -145,8 +145,8 @@ class ParallelDataProviderTest(tf.test.TestCase):
     self.assertEqual(set(item_keys), set(["source_tokens", "source_len"]))
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      sess.run(tf.local_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
+      sess.run(tf.compat.v1.local_variables_initializer())
       with tf.contrib.slim.queues.QueueRunners(sess):
         item_dicts_ = [sess.run(items_dict) for _ in range(num_epochs * 3)]
 

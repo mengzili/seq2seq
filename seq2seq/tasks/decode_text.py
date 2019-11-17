@@ -147,7 +147,7 @@ class DecodeText(InferenceTask):
     if "attention_scores" in self._predictions:
       fetches["attention_scores"] = self._predictions["attention_scores"]
 
-    return tf.train.SessionRunArgs(fetches)
+    return tf.estimator.SessionRunArgs(fetches)
 
   def after_run(self, _run_context, run_values):
     fetches_batch = run_values.results

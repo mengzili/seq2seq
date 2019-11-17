@@ -35,7 +35,7 @@ class TestGatherTree(tf.test.TestCase):
     expected_result = np.array([[2, 2, 2], [6, 5, 6], [7, 8, 9]])
 
     res = beam_search.gather_tree(
-        tf.convert_to_tensor(predicted_ids), tf.convert_to_tensor(parent_ids))
+        tf.convert_to_tensor(value=predicted_ids), tf.convert_to_tensor(value=parent_ids))
     with self.test_session() as sess:
       res_ = sess.run(res)
 
@@ -50,7 +50,7 @@ class TestLengthNorm(tf.test.TestCase):
     lengths_ = np.array([[1, 2, 3], [3, 3, 3]])
     penalty_factor_ = 0.6
     length_pen = beam_search.length_penalty(
-        sequence_lengths=tf.convert_to_tensor(lengths_),
+        sequence_lengths=tf.convert_to_tensor(value=lengths_),
         penalty_factor=penalty_factor_)
 
     with self.test_session() as sess:
@@ -89,7 +89,7 @@ class TestBeamStep(tf.test.TestCase):
     logits_[0, 3] = 2.1
     logits_[1, 3] = 3.1
     logits_[1, 4] = 0.9
-    logits = tf.convert_to_tensor(logits_, dtype=tf.float32)
+    logits = tf.convert_to_tensor(value=logits_, dtype=tf.float32)
     log_probs = tf.nn.log_softmax(logits)
 
     outputs, next_beam_state = beam_search.beam_search_step(
@@ -114,7 +114,7 @@ class TestBeamStep(tf.test.TestCase):
     beam_state = beam_search.BeamSearchState(
         log_probs=tf.nn.log_softmax(tf.ones(self.config.beam_width)),
         lengths=tf.convert_to_tensor(
-            [2, 1, 2], dtype=tf.int32),
+            value=[2, 1, 2], dtype=tf.int32),
         finished=tf.constant(
             [False, True, False], dtype=tf.bool))
 
@@ -122,7 +122,7 @@ class TestBeamStep(tf.test.TestCase):
     logits_[0, 2] = 1.1
     logits_[1, 2] = 1.0
     logits_[2, 2] = 1.0
-    logits = tf.convert_to_tensor(logits_, dtype=tf.float32)
+    logits = tf.convert_to_tensor(value=logits_, dtype=tf.float32)
     log_probs = tf.nn.log_softmax(logits)
 
     outputs, next_beam_state = beam_search.beam_search_step(
@@ -155,7 +155,7 @@ class TestBeamStep(tf.test.TestCase):
     logits_[0, 3] = 2.1
     logits_[1, 3] = 3.1
     logits_[1, 4] = 0.9
-    logits = tf.convert_to_tensor(logits_, dtype=tf.float32)
+    logits = tf.convert_to_tensor(value=logits_, dtype=tf.float32)
     log_probs = tf.nn.log_softmax(logits)
 
     outputs, next_beam_state = beam_search.beam_search_step(

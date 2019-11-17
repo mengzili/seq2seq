@@ -79,7 +79,7 @@ class TFRecordsInputPipelineTest(tf.test.TestCase):
 
   def setUp(self):
     super(TFRecordsInputPipelineTest, self).setUp()
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
   def test_pipeline(self):
     tfrecords_file = test_utils.create_temp_tfrecords(
@@ -100,8 +100,8 @@ class TFRecordsInputPipelineTest(tf.test.TestCase):
     features = pipeline.read_from_data_provider(data_provider)
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      sess.run(tf.local_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
+      sess.run(tf.compat.v1.local_variables_initializer())
       with tf.contrib.slim.queues.QueueRunners(sess):
         res = sess.run(features)
 
@@ -122,7 +122,7 @@ class ParallelTextInputPipelineTest(tf.test.TestCase):
 
   def setUp(self):
     super(ParallelTextInputPipelineTest, self).setUp()
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
   def test_pipeline(self):
     file_source, file_target = test_utils.create_temp_parallel_data(
@@ -142,8 +142,8 @@ class ParallelTextInputPipelineTest(tf.test.TestCase):
     features = pipeline.read_from_data_provider(data_provider)
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      sess.run(tf.local_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
+      sess.run(tf.compat.v1.local_variables_initializer())
       with tf.contrib.slim.queues.QueueRunners(sess):
         res = sess.run(features)
 

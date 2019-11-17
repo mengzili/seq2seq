@@ -56,7 +56,7 @@ def create_temp_tfrecords(sources, targets):
   """
 
   output_file = tempfile.NamedTemporaryFile()
-  writer = tf.python_io.TFRecordWriter(output_file.name)
+  writer = tf.io.TFRecordWriter(output_file.name)
   for source, target in zip(sources, targets):
     ex = tf.train.Example()
     #pylint: disable=E1101

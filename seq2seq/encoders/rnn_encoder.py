@@ -30,7 +30,7 @@ from seq2seq.training import utils as training_utils
 def _unpack_cell(cell):
   """Unpack the cells because the stack_bidirectional_dynamic_rnn
   expects a list of cells, one per layer."""
-  if isinstance(cell, tf.contrib.rnn.MultiRNNCell):
+  if isinstance(cell, tf.compat.v1.nn.rnn_cell.MultiRNNCell):
     return cell._cells  #pylint: disable=W0212
   else:
     return [cell]
@@ -85,13 +85,13 @@ class UnidirectionalRNNEncoder(Encoder):
     }
 
   def encode(self, inputs, sequence_length, **kwargs):
-    scope = tf.get_variable_scope()
-    scope.set_initializer(tf.random_uniform_initializer(
+    scope = tf.compat.v1.get_variable_scope()
+    scope.set_initializer(tf.compat.v1.random_uniform_initializer(
         -self.params["init_scale"],
         self.params["init_scale"]))
 
     cell = training_utils.get_rnn_cell(**self.params["rnn_cell"])
-    outputs, state = tf.nn.dynamic_rnn(
+    outputs, state = tf.compat.v1.nn.dynamic_rnn(
         cell=cell,
         inputs=inputs,
         sequence_length=sequence_length,
@@ -127,14 +127,14 @@ class BidirectionalRNNEncoder(Encoder):
     }
 
   def encode(self, inputs, sequence_length, **kwargs):
-    scope = tf.get_variable_scope()
-    scope.set_initializer(tf.random_uniform_initializer(
+    scope = tf.compat.v1.get_variable_scope()
+    scope.set_initializer(tf.compat.v1.random_uniform_initializer(
         -self.params["init_scale"],
         self.params["init_scale"]))
 
     cell_fw = training_utils.get_rnn_cell(**self.params["rnn_cell"])
     cell_bw = training_utils.get_rnn_cell(**self.params["rnn_cell"])
-    outputs, states = tf.nn.bidirectional_dynamic_rnn(
+    outputs, states = tf.compat.v1.nn.bidirectional_dynamic_rnn(
         cell_fw=cell_fw,
         cell_bw=cell_bw,
         inputs=inputs,
@@ -175,8 +175,8 @@ class StackBidirectionalRNNEncoder(Encoder):
     }
 
   def encode(self, inputs, sequence_length, **kwargs):
-    scope = tf.get_variable_scope()
-    scope.set_initializer(tf.random_uniform_initializer(
+    scope = tf.compat.v1.get_variable_scope()
+    scope.set_initializer(tf.compat.v1.random_uniform_initializer(
         -self.params["init_scale"],
         self.params["init_scale"]))
 

@@ -111,7 +111,7 @@ class Seq2SeqModel(ModelBase):
       vocab_tables = graph_utils.get_dict_from_collection("vocab_tables")
       target_id_to_vocab = vocab_tables["target_id_to_vocab"]
       predicted_tokens = target_id_to_vocab.lookup(
-          tf.to_int64(predictions["predicted_ids"]))
+          tf.cast(predictions["predicted_ids"], dtype=tf.int64))
       # Raw predicted tokens
       predictions["predicted_tokens"] = predicted_tokens
 
@@ -121,17 +121,17 @@ class Seq2SeqModel(ModelBase):
     """Returns the batch size of the curren batch based on the passed
     features.
     """
-    return tf.shape(features["source_ids"])[0]
+    return tf.shape(input=features["source_ids"])[0]
 
   @property
   @templatemethod("source_embedding")
   def source_embedding(self):
     """Returns the embedding used for the source sequence.
     """
-    return tf.get_variable(
+    return tf.compat.v1.get_variable(
         name="W",
         shape=[self.source_vocab_info.total_size, self.params["embedding.dim"]],
-        initializer=tf.random_uniform_initializer(
+        initializer=tf.compat.v1.random_uniform_initializer(
             -self.params["embedding.init_scale"],
             self.params["embedding.init_scale"]))
 
@@ -142,10 +142,10 @@ class Seq2SeqModel(ModelBase):
     """
     if self.params["embedding.share"]:
       return self.source_embedding
-    return tf.get_variable(
+    return tf.compat.v1.get_variable(
         name="W",
         shape=[self.target_vocab_info.total_size, self.params["embedding.dim"]],
-        initializer=tf.random_uniform_initializer(
+        initializer=tf.compat.v1.random_uniform_initializer(
             -self.params["embedding.init_scale"],
             self.params["embedding.init_scale"]))
 
@@ -229,12 +229,12 @@ class Seq2SeqModel(ModelBase):
       features["source_ids"] = tf.reverse_sequence(
           input=features["source_ids"],
           seq_lengths=features["source_len"],
-          seq_dim=1,
-          batch_dim=0,
+          seq_axis=1,
+          batch_axis=0,
           name=None)
 
-    features["source_len"] = tf.to_int32(features["source_len"])
-    tf.summary.histogram("source_len", tf.to_float(features["source_len"]))
+    features["source_len"] = tf.cast(features["source_len"], dtype=tf.int32)
+    tf.compat.v1.summary.histogram("source_len", tf.cast(features["source_len"], dtype=tf.float32))
 
     if labels is None:
       return features, None
@@ -251,15 +251,15 @@ class Seq2SeqModel(ModelBase):
     # Look up the target ids in the vocabulary
     labels["target_ids"] = target_vocab_to_id.lookup(labels["target_tokens"])
 
-    labels["target_len"] = tf.to_int32(labels["target_len"])
-    tf.summary.histogram("target_len", tf.to_float(labels["target_len"]))
+    labels["target_len"] = tf.cast(labels["target_len"], dtype=tf.int32)
+    tf.compat.v1.summary.histogram("target_len", tf.cast(labels["target_len"], dtype=tf.float32))
 
     # Keep track of the number of processed tokens
-    num_tokens = tf.reduce_sum(labels["target_len"])
-    num_tokens += tf.reduce_sum(features["source_len"])
+    num_tokens = tf.reduce_sum(input_tensor=labels["target_len"])
+    num_tokens += tf.reduce_sum(input_tensor=features["source_len"])
     token_counter_var = tf.Variable(0, "tokens_counter")
-    total_tokens = tf.assign_add(token_counter_var, num_tokens)
-    tf.summary.scalar("num_tokens", total_tokens)
+    total_tokens = tf.compat.v1.assign_add(token_counter_var, num_tokens)
+    tf.compat.v1.summary.scalar("num_tokens", total_tokens)
 
     with tf.control_dependencies([total_tokens]):
       features["source_tokens"] = tf.identity(features["source_tokens"])
@@ -281,12 +281,12 @@ class Seq2SeqModel(ModelBase):
     # Calculate loss per example-timestep of shape [B, T]
     losses = seq2seq_losses.cross_entropy_sequence_loss(
         logits=decoder_output.logits[:, :, :],
-        targets=tf.transpose(labels["target_ids"][:, 1:], [1, 0]),
+        targets=tf.transpose(a=labels["target_ids"][:, 1:], perm=[1, 0]),
         sequence_length=labels["target_len"] - 1)
 
     # Calculate the average log perplexity
-    loss = tf.reduce_sum(losses) / tf.to_float(
-        tf.reduce_sum(labels["target_len"] - 1))
+    loss = tf.reduce_sum(input_tensor=losses) / tf.cast(
+        tf.reduce_sum(input_tensor=labels["target_len"] - 1), dtype=tf.float32)
 
     return losses, loss
 

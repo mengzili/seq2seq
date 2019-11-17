@@ -34,7 +34,7 @@ def templatemethod(name_):
 
     def func_wrapper(*args, **kwargs):
       """Inner wrapper function"""
-      templated_func = tf.make_template(name_, func)
+      templated_func = tf.compat.v1.make_template(name_, func)
       return templated_func(*args, **kwargs)
 
     return func_wrapper
@@ -52,8 +52,8 @@ def add_dict_to_collection(dict_, collection_name):
   key_collection = collection_name + "_keys"
   value_collection = collection_name + "_values"
   for key, value in dict_.items():
-    tf.add_to_collection(key_collection, key)
-    tf.add_to_collection(value_collection, value)
+    tf.compat.v1.add_to_collection(key_collection, key)
+    tf.compat.v1.add_to_collection(value_collection, value)
 
 
 def get_dict_from_collection(collection_name):
@@ -67,6 +67,6 @@ def get_dict_from_collection(collection_name):
   """
   key_collection = collection_name + "_keys"
   value_collection = collection_name + "_values"
-  keys = tf.get_collection(key_collection)
-  values = tf.get_collection(value_collection)
+  keys = tf.compat.v1.get_collection(key_collection)
+  values = tf.compat.v1.get_collection(value_collection)
   return dict(zip(keys, values))

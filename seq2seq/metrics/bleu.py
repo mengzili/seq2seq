@@ -53,7 +53,7 @@ def moses_multi_bleu(hypotheses, references, lowercase=False):
         "master/scripts/generic/multi-bleu.perl")
     os.chmod(multi_bleu_path, 0o755)
   except: #pylint: disable=W0702
-    tf.logging.info("Unable to fetch multi-bleu.perl script, using local.")
+    tf.compat.v1.logging.info("Unable to fetch multi-bleu.perl script, using local.")
     metrics_dir = os.path.dirname(os.path.realpath(__file__))
     bin_dir = os.path.abspath(os.path.join(metrics_dir, "..", "..", "bin"))
     multi_bleu_path = os.path.join(bin_dir, "tools/multi-bleu.perl")
@@ -82,8 +82,8 @@ def moses_multi_bleu(hypotheses, references, lowercase=False):
       bleu_score = float(bleu_score)
     except subprocess.CalledProcessError as error:
       if error.output is not None:
-        tf.logging.warning("multi-bleu.perl script returned non-zero exit code")
-        tf.logging.warning(error.output)
+        tf.compat.v1.logging.warning("multi-bleu.perl script returned non-zero exit code")
+        tf.compat.v1.logging.warning(error.output)
       bleu_score = np.float32(0.0)
 
   # Close temp files

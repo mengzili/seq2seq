@@ -109,7 +109,7 @@ class DumpAttention(InferenceTask):
     fetches["features.source_tokens"] = self._predictions[
         "features.source_tokens"]
     fetches["attention_scores"] = self._predictions["attention_scores"]
-    return tf.train.SessionRunArgs(fetches)
+    return tf.estimator.SessionRunArgs(fetches)
 
   def after_run(self, _run_context, run_values):
     fetches_batch = run_values.results
@@ -126,7 +126,7 @@ class DumpAttention(InferenceTask):
         _create_figure(fetches)
         plt.savefig(output_path)
         plt.close()
-        tf.logging.info("Wrote %s", output_path)
+        tf.compat.v1.logging.info("Wrote %s", output_path)
         self._idx += 1
       self._attention_scores_accum.append(_get_scores(fetches))
 
@@ -134,4 +134,4 @@ class DumpAttention(InferenceTask):
     scores_path = os.path.join(self.params["output_dir"],
                                "attention_scores.npz")
     np.savez(scores_path, *self._attention_scores_accum)
-    tf.logging.info("Wrote %s", scores_path)
+    tf.compat.v1.logging.info("Wrote %s", scores_path)

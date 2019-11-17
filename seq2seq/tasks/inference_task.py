@@ -39,7 +39,7 @@ def unbatch_dict(dict_):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class InferenceTask(tf.train.SessionRunHook, Configurable):
+class InferenceTask(tf.estimator.SessionRunHook, Configurable):
   """
   Abstract base class for inference tasks. Defines the logic used to make
   predictions for a specific type of task.

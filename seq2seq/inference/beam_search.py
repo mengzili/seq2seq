@@ -87,7 +87,7 @@ def gather_tree_py(values, parents):
 
 def gather_tree(values, parents):
   """Tensor version of gather_tree_py"""
-  res = tf.py_func(
+  res = tf.compat.v1.py_func(
       func=gather_tree_py, inp=[values, parents], Tout=values.dtype)
   res.set_shape(values.get_shape().as_list())
   return res
@@ -123,7 +123,7 @@ def length_penalty(sequence_lengths, penalty_factor):
   Returns:
     The length penalty factor, a tensor fo shape [beam_size].
    """
-  return tf.div((5. + tf.to_float(sequence_lengths))**penalty_factor, (5. + 1.)
+  return tf.compat.v1.div((5. + tf.cast(sequence_lengths, dtype=tf.float32))**penalty_factor, (5. + 1.)
                 **penalty_factor)
 
 
@@ -177,8 +177,8 @@ def mask_probs(probs, eos_token, finished):
     stay unchanged and finished beams are replaced with a tensor that has all
     probability on the EOS token.
   """
-  vocab_size = tf.shape(probs)[1]
-  finished_mask = tf.expand_dims(tf.to_float(1. - tf.to_float(finished)), 1)
+  vocab_size = tf.shape(input=probs)[1]
+  finished_mask = tf.expand_dims(tf.cast(1. - tf.cast(finished, dtype=tf.float32), dtype=tf.float32), 1)
   # These examples are not finished and we leave them
   non_finished_examples = finished_mask * probs
   # All finished examples are replaced with a vector that has all
@@ -223,7 +223,7 @@ def beam_search_step(time_, logits, beam_state, config):
   # finished previously
   lengths_to_add = tf.one_hot([config.eos_token] * config.beam_width,
                               config.vocab_size, 0, 1)
-  add_mask = (1 - tf.to_int32(previously_finished))
+  add_mask = (1 - tf.cast(previously_finished, dtype=tf.int32))
   lengths_to_add = tf.expand_dims(add_mask, 1) * lengths_to_add
   new_prediction_lengths = tf.expand_dims(prediction_lengths,
                                           1) + lengths_to_add
@@ -237,7 +237,7 @@ def beam_search_step(time_, logits, beam_state, config):
   scores_flat = tf.reshape(scores, [-1])
   # During the first time step we only consider the initial beam
   scores_flat = tf.cond(
-      tf.convert_to_tensor(time_) > 0, lambda: scores_flat, lambda: scores[0])
+      pred=tf.convert_to_tensor(value=time_) > 0, true_fn=lambda: scores_flat, false_fn=lambda: scores[0])
 
   # Pick the next beams according to the specified successors function
   next_beam_scores, word_indices = config.choose_successors_fn(scores_flat,
@@ -249,8 +249,8 @@ def beam_search_step(time_, logits, beam_state, config):
   total_probs_flat = tf.reshape(total_probs, [-1], name="total_probs_flat")
   next_beam_probs = tf.gather(total_probs_flat, word_indices)
   next_beam_probs.set_shape([config.beam_width])
-  next_word_ids = tf.mod(word_indices, config.vocab_size)
-  next_beam_ids = tf.div(word_indices, config.vocab_size)
+  next_word_ids = tf.math.mod(word_indices, config.vocab_size)
+  next_beam_ids = tf.compat.v1.div(word_indices, config.vocab_size)
 
   # Append new ids to current predictions
   next_finished = tf.logical_or(
@@ -261,8 +261,8 @@ def beam_search_step(time_, logits, beam_state, config):
   # 1. Finished beams remain unchanged
   # 2. Beams that are now finished (EOS predicted) remain unchanged
   # 3. Beams that are not yet finished have their length increased by 1
-  lengths_to_add = tf.to_int32(tf.not_equal(next_word_ids, config.eos_token))
-  lengths_to_add = (1 - tf.to_int32(next_finished)) * lengths_to_add
+  lengths_to_add = tf.cast(tf.not_equal(next_word_ids, config.eos_token), dtype=tf.int32)
+  lengths_to_add = (1 - tf.cast(next_finished, dtype=tf.int32)) * lengths_to_add
   next_prediction_len = tf.gather(beam_state.lengths, next_beam_ids)
   next_prediction_len += lengths_to_add
 

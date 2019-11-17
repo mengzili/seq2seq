@@ -63,7 +63,7 @@ class DumpBeams(InferenceTask):
         "beam_search_output.scores"]
     fetches["beam_search_output.log_probs"] = self._predictions[
         "beam_search_output.log_probs"]
-    return tf.train.SessionRunArgs(fetches)
+    return tf.estimator.SessionRunArgs(fetches)
 
   def after_run(self, _run_context, run_values):
     fetches_batch = run_values.results

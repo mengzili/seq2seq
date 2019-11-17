@@ -31,7 +31,7 @@ class Experiment(tf.contrib.learn.Experiment):
     if not eval_result:
       return False
 
-    global_step = eval_result.get(tf.GraphKeys.GLOBAL_STEP)
+    global_step = eval_result.get(tf.compat.v1.GraphKeys.GLOBAL_STEP)
     return global_step and self._train_steps and (
         global_step >= self._train_steps)
 
@@ -94,16 +94,16 @@ class Experiment(tf.contrib.learn.Experiment):
 
       if self._has_training_stopped(eval_result):
         # Exits once max steps of training is satisfied.
-        tf.logging.info("Stop training model as max steps reached")
+        tf.compat.v1.logging.info("Stop training model as max steps reached")
         break
 
-      tf.logging.info("Training model for %s steps", train_steps_per_iteration)
+      tf.compat.v1.logging.info("Training model for %s steps", train_steps_per_iteration)
       self._estimator.fit(
           input_fn=self._train_input_fn,
           steps=train_steps_per_iteration,
           monitors=self._train_monitors)
 
-      tf.logging.info("Evaluating model now.")
+      tf.compat.v1.logging.info("Evaluating model now.")
       eval_result = self._estimator.evaluate(
           input_fn=self._eval_input_fn,
           steps=self._eval_steps,

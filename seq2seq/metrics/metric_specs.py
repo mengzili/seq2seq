@@ -45,7 +45,7 @@ def accumulate_strings(values, name="strings"):
   Returns:
     A tuple (value_tensor, update_op).
   """
-  tf.assert_type(values, tf.string)
+  tf.compat.v1.assert_type(values, tf.string)
   strings = tf.Variable(
       name=name,
       initial_value=[],
@@ -54,7 +54,7 @@ def accumulate_strings(values, name="strings"):
       collections=[],
       validate_shape=True)
   value_tensor = tf.identity(strings)
-  update_op = tf.assign(
+  update_op = tf.compat.v1.assign(
       ref=strings, value=tf.concat([strings, values], 0), validate_shape=False)
   return value_tensor, update_op
 
@@ -104,20 +104,20 @@ class TextMetricSpec(Configurable, MetricSpec):
   def create_metric_ops(self, _inputs, labels, predictions):
     """Creates (value, update_op) tensors
     """
-    with tf.variable_scope(self._name):
+    with tf.compat.v1.variable_scope(self._name):
 
       # Join tokens into single strings
-      predictions_flat = tf.reduce_join(
-          predictions["predicted_tokens"], 1, separator=self._separator)
-      labels_flat = tf.reduce_join(
-          labels["target_tokens"], 1, separator=self._separator)
+      predictions_flat = tf.strings.reduce_join(
+          inputs=predictions["predicted_tokens"], axis=1, separator=self._separator)
+      labels_flat = tf.strings.reduce_join(
+          inputs=labels["target_tokens"], axis=1, separator=self._separator)
 
       sources_value, sources_update = accumulate_strings(
           values=predictions_flat, name="sources")
       targets_value, targets_update = accumulate_strings(
           values=labels_flat, name="targets")
 
-      metric_value = tf.py_func(
+      metric_value = tf.compat.v1.py_func(
           func=self._py_func,
           inp=[sources_value, targets_value],
           Tout=tf.float32,
@@ -227,6 +227,6 @@ class LogPerplexityMetricSpec(MetricSpec, Configurable):
   def create_metric_ops(self, _inputs, labels, predictions):
     """Creates the metric op"""
     loss_mask = tf.sequence_mask(
-        lengths=tf.to_int32(labels["target_len"] - 1),
-        maxlen=tf.to_int32(tf.shape(predictions["losses"])[1]))
+        lengths=tf.cast(labels["target_len"] - 1, dtype=tf.int32),
+        maxlen=tf.cast(tf.shape(input=predictions["losses"])[1], dtype=tf.int32))
     return metrics.streaming_mean(predictions["losses"], loss_mask)

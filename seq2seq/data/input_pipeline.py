@@ -151,7 +151,7 @@ class ParallelTextInputPipeline(InputPipeline):
 
     dataset_source = tf.contrib.slim.dataset.Dataset(
         data_sources=self.params["source_files"],
-        reader=tf.TextLineReader,
+        reader=tf.compat.v1.TextLineReader,
         decoder=decoder_source,
         num_samples=None,
         items_to_descriptions={})
@@ -167,7 +167,7 @@ class ParallelTextInputPipeline(InputPipeline):
 
       dataset_target = tf.contrib.slim.dataset.Dataset(
           data_sources=self.params["target_files"],
-          reader=tf.TextLineReader,
+          reader=tf.compat.v1.TextLineReader,
           decoder=decoder_target,
           num_samples=None,
           items_to_descriptions={})
@@ -230,8 +230,8 @@ class TFRecordInputPipeline(InputPipeline):
         delimiter=self.params["target_delimiter"])
 
     keys_to_features = {
-        self.params["source_field"]: tf.FixedLenFeature((), tf.string),
-        self.params["target_field"]: tf.FixedLenFeature(
+        self.params["source_field"]: tf.io.FixedLenFeature((), tf.string),
+        self.params["target_field"]: tf.io.FixedLenFeature(
             (), tf.string, default_value="")
     }
 
@@ -258,7 +258,7 @@ class TFRecordInputPipeline(InputPipeline):
 
     dataset = tf.contrib.slim.dataset.Dataset(
         data_sources=self.params["files"],
-        reader=tf.TFRecordReader,
+        reader=tf.compat.v1.TFRecordReader,
         decoder=decoder,
         num_samples=None,
         items_to_descriptions={})
@@ -307,16 +307,16 @@ class ImageCaptioningInputPipeline(InputPipeline):
   def make_data_provider(self, **kwargs):
 
     context_keys_to_features = {
-        self.params["image_field"]: tf.FixedLenFeature(
+        self.params["image_field"]: tf.io.FixedLenFeature(
             [], dtype=tf.string),
-        "image/format": tf.FixedLenFeature(
+        "image/format": tf.io.FixedLenFeature(
             [], dtype=tf.string, default_value=self.params["image_format"]),
     }
 
     sequence_keys_to_features = {
-        self.params["caption_ids_field"]: tf.FixedLenSequenceFeature(
+        self.params["caption_ids_field"]: tf.io.FixedLenSequenceFeature(
             [], dtype=tf.int64),
-        self.params["caption_tokens_field"]: tf.FixedLenSequenceFeature(
+        self.params["caption_tokens_field"]: tf.io.FixedLenSequenceFeature(
             [], dtype=tf.string)
     }
 
@@ -331,7 +331,7 @@ class ImageCaptioningInputPipeline(InputPipeline):
         tfexample_decoder.Tensor(self.params["caption_tokens_field"]),
         "target_len": tfexample_decoder.ItemHandlerCallback(
             keys=[self.params["caption_tokens_field"]],
-            func=lambda x: tf.size(x[self.params["caption_tokens_field"]]))
+            func=lambda x: tf.size(input=x[self.params["caption_tokens_field"]]))
     }
 
     decoder = TFSEquenceExampleDecoder(
@@ -339,7 +339,7 @@ class ImageCaptioningInputPipeline(InputPipeline):
 
     dataset = tf.contrib.slim.dataset.Dataset(
         data_sources=self.params["files"],
-        reader=tf.TFRecordReader,
+        reader=tf.compat.v1.TFRecordReader,
         decoder=decoder,
         num_samples=None,
         items_to_descriptions={})

@@ -75,7 +75,7 @@ def _create_position_embedding(embedding_dim, num_positions, lengths, maxlen):
   # Slice to size of current sequence
   pe_slice = position_encodings[:maxlen, :]
   # Replicate encodings for each element in the batch
-  batch_size = tf.shape(lengths)[0]
+  batch_size = tf.shape(input=lengths)[0]
   pe_batch = tf.tile([pe_slice], [batch_size, 1, 1])
 
   # Mask out positions that are padded
@@ -129,7 +129,7 @@ class PoolingEncoder(Encoder):
           embedding_dim=inputs.get_shape().as_list()[-1],
           num_positions=self.params["position_embeddings.num_positions"],
           lengths=sequence_length,
-          maxlen=tf.shape(inputs)[1])
+          maxlen=tf.shape(input=inputs)[1])
       inputs = self._combiner_fn(inputs, positions_embed)
 
     # Apply dropout
@@ -145,7 +145,7 @@ class PoolingEncoder(Encoder):
         padding="SAME")
 
     # Final state is the average representation of the pooled embeddings
-    final_state = tf.reduce_mean(outputs, 1)
+    final_state = tf.reduce_mean(input_tensor=outputs, axis=1)
 
     return EncoderOutput(
         outputs=outputs,

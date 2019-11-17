@@ -57,7 +57,7 @@ class EncoderDecoderTests(tf.test.TestCase):
 
   def setUp(self):
     super(EncoderDecoderTests, self).setUp()
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
     self.batch_size = 2
     self.input_depth = 4
     self.sequence_length = 10
@@ -121,9 +121,9 @@ class EncoderDecoderTests(tf.test.TestCase):
     fetches = [_ for _ in fetches if _ is not None]
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      sess.run(tf.local_variables_initializer())
-      sess.run(tf.tables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
+      sess.run(tf.compat.v1.local_variables_initializer())
+      sess.run(tf.compat.v1.tables_initializer())
       with tf.contrib.slim.queues.QueueRunners(sess):
         fetches_ = sess.run(fetches)
 
@@ -212,8 +212,8 @@ class TestAttentionSeq2Seq(EncoderDecoderTests):
 
   def setUp(self):
     super(TestAttentionSeq2Seq, self).setUp()
-    self.encoder_rnn_cell = tf.contrib.rnn.LSTMCell(32)
-    self.decoder_rnn_cell = tf.contrib.rnn.LSTMCell(32)
+    self.encoder_rnn_cell = tf.compat.v1.nn.rnn_cell.LSTMCell(32)
+    self.decoder_rnn_cell = tf.compat.v1.nn.rnn_cell.LSTMCell(32)
     self.attention_dim = 128
 
   def create_model(self, mode, params=None):

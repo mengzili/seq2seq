@@ -30,7 +30,7 @@ from seq2seq.data import split_tokens_decoder
 
 def make_parallel_data_provider(data_sources_source,
                                 data_sources_target,
-                                reader=tf.TextLineReader,
+                                reader=tf.compat.v1.TextLineReader,
                                 num_samples=None,
                                 source_delimiter=" ",
                                 target_delimiter=" ",
@@ -138,15 +138,15 @@ class ParallelDataProvider(data_provider.DataProvider):
 
     # Optionally shuffle the data
     if shuffle:
-      shuffle_queue = tf.RandomShuffleQueue(
+      shuffle_queue = tf.queue.RandomShuffleQueue(
           capacity=common_queue_capacity,
           min_after_dequeue=common_queue_min,
           dtypes=[tf.string, tf.string],
           seed=seed)
       enqueue_ops = []
       enqueue_ops.append(shuffle_queue.enqueue([data_source, data_target]))
-      tf.train.add_queue_runner(
-          tf.train.QueueRunner(shuffle_queue, enqueue_ops))
+      tf.compat.v1.train.add_queue_runner(
+          tf.compat.v1.train.QueueRunner(shuffle_queue, enqueue_ops))
       data_source, data_target = shuffle_queue.dequeue()
 
     # Decode source items

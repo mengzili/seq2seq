@@ -86,7 +86,7 @@ class AttentionDecoder(RNNDecoder):
         logits=self.vocab_size,
         predicted_ids=tf.TensorShape([]),
         cell_output=self.cell.output_size,
-        attention_scores=tf.shape(self.attention_values)[1:-1],
+        attention_scores=tf.shape(input=self.attention_values)[1:-1],
         attention_context=self.attention_values.get_shape()[-1])
 
   @property
@@ -103,7 +103,7 @@ class AttentionDecoder(RNNDecoder):
 
     # Concat empty attention context
     attention_context = tf.zeros([
-        tf.shape(first_inputs)[0],
+        tf.shape(input=first_inputs)[0],
         self.attention_values.get_shape().as_list()[-1]
     ])
     first_inputs = tf.concat([first_inputs, attention_context], 1)
@@ -170,8 +170,8 @@ class AttentionDecoder(RNNDecoder):
       attention_scores = tf.reverse_sequence(
           input=attention_scores,
           seq_lengths=self.reverse_scores_lengths,
-          seq_dim=1,
-          batch_dim=0)
+          seq_axis=1,
+          batch_axis=0)
 
     sample_ids = self.helper.sample(
         time=time_, outputs=logits, state=cell_state)

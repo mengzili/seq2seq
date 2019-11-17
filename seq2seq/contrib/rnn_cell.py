@@ -30,7 +30,7 @@ from tensorflow.contrib.rnn import MultiRNNCell  # pylint: disable=E0611
 # Import all cell classes from Tensorflow
 TF_CELL_CLASSES = [
     x for x in tf.contrib.rnn.__dict__.values()
-    if inspect.isclass(x) and issubclass(x, tf.contrib.rnn.RNNCell)
+    if inspect.isclass(x) and issubclass(x, tf.compat.v1.nn.rnn_cell.RNNCell)
 ]
 for cell_class in TF_CELL_CLASSES:
   setattr(sys.modules[__name__], cell_class.__name__, cell_class)
@@ -77,7 +77,7 @@ class ExtendedMultiRNNCell(MultiRNNCell):
       return super(ExtendedMultiRNNCell, self).__call__(
           inputs, state, (scope or "extended_multi_rnn_cell"))
 
-    with tf.variable_scope(scope or "extended_multi_rnn_cell"):
+    with tf.compat.v1.variable_scope(scope or "extended_multi_rnn_cell"):
       # Adding Residual connections are only possible when input and output
       # sizes are equal. Optionally transform the initial inputs to
       # `cell[0].output_size`
@@ -94,7 +94,7 @@ class ExtendedMultiRNNCell(MultiRNNCell):
       prev_inputs = [cur_inp]
       new_states = []
       for i, cell in enumerate(self._cells):
-        with tf.variable_scope("cell_%d" % i):
+        with tf.compat.v1.variable_scope("cell_%d" % i):
           if not nest.is_sequence(state):
             raise ValueError(
                 "Expected state to be a tuple of length %d, but received: %s" %
@@ -111,7 +111,7 @@ class ExtendedMultiRNNCell(MultiRNNCell):
           if self._residual_combiner == "add":
             next_input = next_input + sum(input_to_combine)
           if self._residual_combiner == "mean":
-            combined_mean = tf.reduce_mean(tf.stack(input_to_combine), 0)
+            combined_mean = tf.reduce_mean(input_tensor=tf.stack(input_to_combine), axis=0)
             next_input = next_input + combined_mean
           elif self._residual_combiner == "concat":
             next_input = tf.concat([next_input] + input_to_combine, 1)

@@ -34,7 +34,7 @@ class AttentionLayerTest(tf.test.TestCase):
 
   def setUp(self):
     super(AttentionLayerTest, self).setUp()
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
     self.batch_size = 8
     self.attention_dim = 128
     self.input_dim = 16
@@ -47,9 +47,9 @@ class AttentionLayerTest(tf.test.TestCase):
 
   def _test_layer(self):
     """Tests Attention layer with a  given score type"""
-    inputs_pl = tf.placeholder(tf.float32, (None, None, self.input_dim))
-    inputs_length_pl = tf.placeholder(tf.int32, [None])
-    state_pl = tf.placeholder(tf.float32, (None, self.state_dim))
+    inputs_pl = tf.compat.v1.placeholder(tf.float32, (None, None, self.input_dim))
+    inputs_length_pl = tf.compat.v1.placeholder(tf.int32, [None])
+    state_pl = tf.compat.v1.placeholder(tf.float32, (None, self.state_dim))
     attention_fn = self._create_layer()
     scores, context = attention_fn(
         query=state_pl,
@@ -58,7 +58,7 @@ class AttentionLayerTest(tf.test.TestCase):
         values_length=inputs_length_pl)
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       feed_dict = {}
       feed_dict[inputs_pl] = np.random.randn(self.batch_size, self.seq_len,
                                              self.input_dim)

@@ -38,7 +38,7 @@ class TestGetRNNCell(tf.test.TestCase):
   def test_single_layer(self):
     cell = training_utils.get_rnn_cell(
         cell_class="BasicLSTMCell", cell_params={"num_units": 16}, num_layers=1)
-    self.assertIsInstance(cell, tf.contrib.rnn.BasicLSTMCell)
+    self.assertIsInstance(cell, tf.compat.v1.nn.rnn_cell.BasicLSTMCell)
     self.assertEqual(cell.output_size, 16)
 
   def test_multi_layer(self):
@@ -52,7 +52,7 @@ class TestGetRNNCell(tf.test.TestCase):
         cell_class="tensorflow.contrib.rnn.BasicRNNCell",
         cell_params={"num_units": 16},
         num_layers=1)
-    self.assertIsInstance(cell, tf.contrib.rnn.BasicRNNCell)
+    self.assertIsInstance(cell, tf.compat.v1.nn.rnn_cell.BasicRNNCell)
     self.assertEqual(cell.output_size, 16)
 
   def test_dropout(self):
@@ -79,7 +79,7 @@ class TestGetRNNCell(tf.test.TestCase):
                      "use_peepholes": True,
                      "forget_bias": 0.5},
         num_layers=1)
-    self.assertIsInstance(cell, tf.contrib.rnn.LSTMCell)
+    self.assertIsInstance(cell, tf.compat.v1.nn.rnn_cell.LSTMCell)
     #pylint: disable=E1101,W0212
     self.assertEqual(cell._use_peepholes, True)
     self.assertEqual(cell._forget_bias, 0.5)

@@ -39,7 +39,7 @@ class TestPrintModelAnalysisHook(tf.test.TestCase):
   def test_begin(self):
     model_dir = tempfile.mkdtemp()
     outfile = tempfile.NamedTemporaryFile()
-    tf.get_variable("weigths", [128, 128])
+    tf.compat.v1.get_variable("weigths", [128, 128])
     hook = hooks.PrintModelAnalysisHook(
         params={}, model_dir=model_dir, run_config=tf.contrib.learn.RunConfig())
     hook.begin()
@@ -81,14 +81,14 @@ class TestTrainSampleHook(tf.test.TestCase):
     no_op = tf.no_op()
     hook.begin()
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      sess.run(tf.local_variables_initializer())
-      sess.run(tf.tables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
+      sess.run(tf.compat.v1.local_variables_initializer())
+      sess.run(tf.compat.v1.tables_initializer())
 
       #pylint: disable=W0212
       mon_sess = monitored_session._HookedSession(sess, [hook])
       # Should trigger for step 0
-      sess.run(tf.assign(global_step, 0))
+      sess.run(tf.compat.v1.assign(global_step, 0))
       mon_sess.run(no_op)
 
       outfile = os.path.join(self.sample_dir, "samples_000000.txt")
@@ -97,13 +97,13 @@ class TestTrainSampleHook(tf.test.TestCase):
                       readfile.read().decode("utf-8"))
 
       # Should not trigger for step 9
-      sess.run(tf.assign(global_step, 9))
+      sess.run(tf.compat.v1.assign(global_step, 9))
       mon_sess.run(no_op)
       outfile = os.path.join(self.sample_dir, "samples_000009.txt")
       self.assertFalse(os.path.exists(outfile))
 
       # Should trigger for step 10
-      sess.run(tf.assign(global_step, 10))
+      sess.run(tf.compat.v1.assign(global_step, 10))
       mon_sess.run(no_op)
       outfile = os.path.join(self.sample_dir, "samples_000010.txt")
       with open(outfile, "rb") as readfile:
@@ -125,7 +125,7 @@ class TestMetadataCaptureHook(tf.test.TestCase):
   def test_capture(self):
     global_step = tf.contrib.framework.get_or_create_global_step()
     # Some test computation
-    some_weights = tf.get_variable("weigths", [2, 128])
+    some_weights = tf.compat.v1.get_variable("weigths", [2, 128])
     computation = tf.nn.softmax(some_weights)
 
     hook = hooks.MetadataCaptureHook(
@@ -134,15 +134,15 @@ class TestMetadataCaptureHook(tf.test.TestCase):
     hook.begin()
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       #pylint: disable=W0212
       mon_sess = monitored_session._HookedSession(sess, [hook])
       # Should not trigger for step 0
-      sess.run(tf.assign(global_step, 0))
+      sess.run(tf.compat.v1.assign(global_step, 0))
       mon_sess.run(computation)
       self.assertEqual(gfile.ListDirectory(self.model_dir), [])
       # Should trigger *after* step 5
-      sess.run(tf.assign(global_step, 5))
+      sess.run(tf.compat.v1.assign(global_step, 5))
       mon_sess.run(computation)
       self.assertEqual(gfile.ListDirectory(self.model_dir), [])
       mon_sess.run(computation)

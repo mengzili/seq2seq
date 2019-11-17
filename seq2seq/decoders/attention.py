@@ -37,13 +37,13 @@ from seq2seq.configurable import Configurable
     noinline=True)
 def att_sum_bahdanau(v_att, keys, query):
   """Calculates a batch- and timweise dot product with a variable"""
-  return tf.reduce_sum(v_att * tf.tanh(keys + tf.expand_dims(query, 1)), [2])
+  return tf.reduce_sum(input_tensor=v_att * tf.tanh(keys + tf.expand_dims(query, 1)), axis=[2])
 
 
 @function.Defun(tf.float32, tf.float32, func_name="att_sum_dot", noinline=True)
 def att_sum_dot(keys, query):
   """Calculates a batch- and timweise dot product"""
-  return tf.reduce_sum(keys * tf.expand_dims(query, 1), [2])
+  return tf.reduce_sum(input_tensor=keys * tf.expand_dims(query, 1), axis=[2])
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -111,10 +111,10 @@ class AttentionLayer(GraphModule, Configurable):
     scores = self.score_fn(att_keys, att_query)
 
     # Replace all scores for padded inputs with tf.float32.min
-    num_scores = tf.shape(scores)[1]
+    num_scores = tf.shape(input=scores)[1]
     scores_mask = tf.sequence_mask(
-        lengths=tf.to_int32(values_length),
-        maxlen=tf.to_int32(num_scores),
+        lengths=tf.cast(values_length, dtype=tf.int32),
+        maxlen=tf.cast(num_scores, dtype=tf.int32),
         dtype=tf.float32)
     scores = scores * scores_mask + ((1.0 - scores_mask) * tf.float32.min)
 
@@ -124,7 +124,7 @@ class AttentionLayer(GraphModule, Configurable):
     # Calculate the weighted average of the attention inputs
     # according to the scores
     context = tf.expand_dims(scores_normalized, 2) * values
-    context = tf.reduce_sum(context, 1, name="context")
+    context = tf.reduce_sum(input_tensor=context, axis=1, name="context")
     context.set_shape([None, values_depth])
 
 
@@ -145,6 +145,6 @@ class AttentionLayerBahdanau(AttentionLayer):
   a parameterized multiplication."""
 
   def score_fn(self, keys, query):
-    v_att = tf.get_variable(
+    v_att = tf.compat.v1.get_variable(
         "v_att", shape=[self.params["num_units"]], dtype=tf.float32)
     return att_sum_bahdanau(v_att, keys, query)

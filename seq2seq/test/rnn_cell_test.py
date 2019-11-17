@@ -35,17 +35,17 @@ class ExtendedMultiRNNCellTest(tf.test.TestCase):
     state = (tf.constant(np.random.randn(1, 2)),
              tf.constant(np.random.randn(1, 2)))
 
-    with tf.variable_scope("root", initializer=tf.constant_initializer(0.5)):
-      standard_cell = tf.contrib.rnn.MultiRNNCell(
-          [tf.contrib.rnn.GRUCell(2) for _ in range(2)], state_is_tuple=True)
+    with tf.compat.v1.variable_scope("root", initializer=tf.compat.v1.constant_initializer(0.5)):
+      standard_cell = tf.compat.v1.nn.rnn_cell.MultiRNNCell(
+          [tf.compat.v1.nn.rnn_cell.GRUCell(2) for _ in range(2)], state_is_tuple=True)
       res_standard = standard_cell(inputs, state, scope="standard")
 
       test_cell = rnn_cell.ExtendedMultiRNNCell(
-          [tf.contrib.rnn.GRUCell(2) for _ in range(2)])
+          [tf.compat.v1.nn.rnn_cell.GRUCell(2) for _ in range(2)])
       res_test = test_cell(inputs, state, scope="test")
 
     with self.test_session() as sess:
-      sess.run([tf.global_variables_initializer()])
+      sess.run([tf.compat.v1.global_variables_initializer()])
       res_standard_, res_test_, = sess.run([res_standard, res_test])
 
     # Make sure it produces the same results as the standard cell
@@ -55,39 +55,39 @@ class ExtendedMultiRNNCellTest(tf.test.TestCase):
 
   def _test_with_residuals(self, inputs, **kwargs):
     """Runs the cell in a session"""
-    inputs = tf.convert_to_tensor(inputs)
+    inputs = tf.convert_to_tensor(value=inputs)
     state = (tf.constant(np.random.randn(1, 2)),
              tf.constant(np.random.randn(1, 2)))
 
-    with tf.variable_scope("root", initializer=tf.constant_initializer(0.5)):
+    with tf.compat.v1.variable_scope("root", initializer=tf.compat.v1.constant_initializer(0.5)):
       test_cell = rnn_cell.ExtendedMultiRNNCell(
-          [tf.contrib.rnn.GRUCell(2) for _ in range(2)],
+          [tf.compat.v1.nn.rnn_cell.GRUCell(2) for _ in range(2)],
           residual_connections=True,
           **kwargs)
       res_test = test_cell(inputs, state, scope="test")
 
     with self.test_session() as sess:
-      sess.run([tf.global_variables_initializer()])
+      sess.run([tf.compat.v1.global_variables_initializer()])
       return sess.run(res_test)
 
   def _test_constant_shape(self, combiner):
     """Tests a residual combiner whose shape doesn't change
     with depth"""
     inputs = np.random.randn(1, 2)
-    with tf.variable_scope("same_input_size"):
+    with tf.compat.v1.variable_scope("same_input_size"):
       res_ = self._test_with_residuals(inputs, residual_combiner=combiner)
       self.assertEqual(res_[0].shape, (1, 2))
       self.assertEqual(res_[1][0].shape, (1, 2))
       self.assertEqual(res_[1][1].shape, (1, 2))
 
     inputs = np.random.randn(1, 5)
-    with tf.variable_scope("diff_input_size"):
+    with tf.compat.v1.variable_scope("diff_input_size"):
       res_ = self._test_with_residuals(inputs, residual_combiner=combiner)
       self.assertEqual(res_[0].shape, (1, 2))
       self.assertEqual(res_[1][0].shape, (1, 2))
       self.assertEqual(res_[1][1].shape, (1, 2))
 
-    with tf.variable_scope("same_input_size_dense"):
+    with tf.compat.v1.variable_scope("same_input_size_dense"):
       res_ = self._test_with_residuals(
           inputs, residual_combiner=combiner, residual_dense=True)
       self.assertEqual(res_[0].shape, (1, 2))
@@ -95,7 +95,7 @@ class ExtendedMultiRNNCellTest(tf.test.TestCase):
       self.assertEqual(res_[1][1].shape, (1, 2))
 
     inputs = np.random.randn(1, 5)
-    with tf.variable_scope("diff_input_size_dense"):
+    with tf.compat.v1.variable_scope("diff_input_size_dense"):
       res_ = self._test_with_residuals(
           inputs, residual_combiner=combiner, residual_dense=True)
       self.assertEqual(res_[0].shape, (1, 2))
@@ -110,21 +110,21 @@ class ExtendedMultiRNNCellTest(tf.test.TestCase):
 
   def test_residuals_concat(self):
     inputs = np.random.randn(1, 2)
-    with tf.variable_scope("same_input_size"):
+    with tf.compat.v1.variable_scope("same_input_size"):
       res_ = self._test_with_residuals(inputs, residual_combiner="concat")
       self.assertEqual(res_[0].shape, (1, 6))
       self.assertEqual(res_[1][0].shape, (1, 2))
       self.assertEqual(res_[1][1].shape, (1, 2))
 
     inputs = np.random.randn(1, 5)
-    with tf.variable_scope("diff_input_size"):
+    with tf.compat.v1.variable_scope("diff_input_size"):
       res_ = self._test_with_residuals(inputs, residual_combiner="concat")
       self.assertEqual(res_[0].shape, (1, 5 + 2 + 2))
       self.assertEqual(res_[1][0].shape, (1, 2))
       self.assertEqual(res_[1][1].shape, (1, 2))
 
     inputs = np.random.randn(1, 2)
-    with tf.variable_scope("same_input_size_dense"):
+    with tf.compat.v1.variable_scope("same_input_size_dense"):
       res_ = self._test_with_residuals(
           inputs, residual_combiner="concat", residual_dense=True)
       self.assertEqual(res_[0].shape, (1, 2 + 4 + 2))
@@ -132,7 +132,7 @@ class ExtendedMultiRNNCellTest(tf.test.TestCase):
       self.assertEqual(res_[1][1].shape, (1, 2))
 
     inputs = np.random.randn(1, 5)
-    with tf.variable_scope("diff_input_size_dense"):
+    with tf.compat.v1.variable_scope("diff_input_size_dense"):
       res_ = self._test_with_residuals(
           inputs, residual_combiner="concat", residual_dense=True)
       self.assertEqual(res_[0].shape, (1, 2 + (5 + 2) + 5))

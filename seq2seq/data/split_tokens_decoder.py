@@ -51,7 +51,7 @@ class SplitTokensDecoder(data_decoder.DataDecoder):
     decoded_items = {}
 
     # Split tokens
-    tokens = tf.string_split([data], delimiter=self.delimiter).values
+    tokens = tf.compat.v1.string_split([data], delimiter=self.delimiter).values
 
     # Optionally prepend a special token
     if self.prepend_token is not None:
@@ -61,7 +61,7 @@ class SplitTokensDecoder(data_decoder.DataDecoder):
     if self.append_token is not None:
       tokens = tf.concat([tokens, [self.append_token]], 0)
 
-    decoded_items[self.length_feature_name] = tf.size(tokens)
+    decoded_items[self.length_feature_name] = tf.size(input=tokens)
     decoded_items[self.tokens_feature_name] = tokens
     return [decoded_items[_] for _ in items]
 

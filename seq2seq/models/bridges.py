@@ -56,7 +56,7 @@ class Bridge(Configurable):
     self.encoder_outputs = encoder_outputs
     self.decoder_state_size = decoder_state_size
     self.batch_size = tf.shape(
-        nest.flatten(self.encoder_outputs.final_state)[0])[0]
+        input=nest.flatten(self.encoder_outputs.final_state)[0])[0]
 
   def __call__(self):
     """Runs the bridge function.

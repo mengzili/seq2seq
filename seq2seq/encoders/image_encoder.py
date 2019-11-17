@@ -49,12 +49,12 @@ class InceptionV3Encoder(Encoder):
     }
 
   def encode(self, inputs):
-    inputs = tf.image.resize_images(
+    inputs = tf.image.resize(
         images=inputs,
         size=[self.params["resize_height"], self.params["resize_width"]],
         method=tf.image.ResizeMethod.BILINEAR)
 
-    outputs, _ = inception_v3_base(tf.to_float(inputs))
+    outputs, _ = inception_v3_base(tf.cast(inputs, dtype=tf.float32))
     output_shape = outputs.get_shape()  #pylint: disable=E1101
     shape_list = output_shape.as_list()
 
@@ -72,4 +72,4 @@ class InceptionV3Encoder(Encoder):
         outputs=outputs_flat,
         final_state=final_state,
         attention_values=outputs_flat,
-        attention_values_length=tf.shape(outputs_flat)[1])
+        attention_values_length=tf.shape(input=outputs_flat)[1])

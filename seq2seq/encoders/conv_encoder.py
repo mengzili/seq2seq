@@ -75,7 +75,7 @@ class ConvEncoder(Encoder):
           embedding_dim=inputs.get_shape().as_list()[-1],
           num_positions=self.params["position_embeddings.num_positions"],
           lengths=sequence_length,
-          maxlen=tf.shape(inputs)[1])
+          maxlen=tf.shape(input=inputs)[1])
       inputs = self._combiner_fn(inputs, positions_embed)
 
     # Apply dropout to embeddings
@@ -84,7 +84,7 @@ class ConvEncoder(Encoder):
         keep_prob=self.params["embedding_dropout_keep_prob"],
         is_training=self.mode == tf.contrib.learn.ModeKeys.TRAIN)
 
-    with tf.variable_scope("cnn_a"):
+    with tf.compat.v1.variable_scope("cnn_a"):
       cnn_a_output = inputs
       for layer_idx in range(self.params["attention_cnn.layers"]):
         next_layer = tf.contrib.layers.conv2d(
@@ -98,7 +98,7 @@ class ConvEncoder(Encoder):
           next_layer += cnn_a_output
         cnn_a_output = tf.tanh(next_layer)
 
-    with tf.variable_scope("cnn_c"):
+    with tf.compat.v1.variable_scope("cnn_c"):
       cnn_c_output = inputs
       for layer_idx in range(self.params["output_cnn.layers"]):
         next_layer = tf.contrib.layers.conv2d(
@@ -112,7 +112,7 @@ class ConvEncoder(Encoder):
           next_layer += cnn_c_output
         cnn_c_output = tf.tanh(next_layer)
 
-    final_state = tf.reduce_mean(cnn_c_output, 1)
+    final_state = tf.reduce_mean(input_tensor=cnn_c_output, axis=1)
 
     return EncoderOutput(
         outputs=cnn_a_output,

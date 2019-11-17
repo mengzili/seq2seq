@@ -80,7 +80,7 @@ class ModelBase(Configurable):
 
     # Optionally wrap with SyncReplicasOptimizer
     if self.params["optimizer.sync_replicas"] > 0:
-      optimizer = tf.train.SyncReplicasOptimizer(
+      optimizer = tf.compat.v1.train.SyncReplicasOptimizer(
           opt=optimizer,
           replicas_to_aggregate=self.params[
               "optimizer.sync_replicas_to_aggregate"],
@@ -141,8 +141,8 @@ class ModelBase(Configurable):
     """Creates the model graph. See the model_fn documentation in
     tf.contrib.learn.Estimator class for a more detailed explanation.
     """
-    with tf.variable_scope("model"):
-      with tf.variable_scope(self.name):
+    with tf.compat.v1.variable_scope("model"):
+      with tf.compat.v1.variable_scope(self.name):
         return self._build(features, labels, params)
 
   def _build(self, features, labels, params):

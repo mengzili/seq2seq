@@ -79,8 +79,8 @@ class BasicSeq2Seq(Seq2SeqModel):
 
   def _decode_train(self, decoder, bridge, _encoder_output, _features, labels):
     """Runs decoding in training mode"""
-    target_embedded = tf.nn.embedding_lookup(self.target_embedding,
-                                             labels["target_ids"])
+    target_embedded = tf.nn.embedding_lookup(params=self.target_embedding,
+                                             ids=labels["target_ids"])
     helper_train = tf_decode_helper.TrainingHelper(
         inputs=target_embedded[:, :-1],
         sequence_length=labels["target_len"] - 1)
@@ -103,8 +103,8 @@ class BasicSeq2Seq(Seq2SeqModel):
 
   @templatemethod("encode")
   def encode(self, features, labels):
-    source_embedded = tf.nn.embedding_lookup(self.source_embedding,
-                                             features["source_ids"])
+    source_embedded = tf.nn.embedding_lookup(params=self.source_embedding,
+                                             ids=features["source_ids"])
     encoder_fn = self.encoder_class(self.params["encoder.params"], self.mode)
     return encoder_fn(source_embedded, features["source_len"])
 

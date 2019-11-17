@@ -41,7 +41,7 @@ def create_inference_graph(model, input_pipeline, batch_size=32):
   # How to get rid of this?
   if hasattr(model, "use_beam_search"):
     if model.use_beam_search:
-      tf.logging.info("Setting batch size to 1 for beam search.")
+      tf.compat.v1.logging.info("Setting batch size to 1 for beam search.")
       batch_size = 1
 
   input_fn = training_utils.create_input_fn(

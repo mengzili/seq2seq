@@ -61,7 +61,7 @@ def load_metadata(model_dir):
   """
   # Import RunMetadata
   run_meta_path = os.path.join(model_dir, "metadata/run_meta")
-  run_meta = tf.RunMetadata()
+  run_meta = tf.compat.v1.RunMetadata()
   if gfile.Exists(run_meta_path):
     with gfile.GFile(run_meta_path, "rb") as file:
       run_meta.MergeFromString(file.read())
@@ -75,7 +75,7 @@ def load_metadata(model_dir):
   if gfile.Exists(graph_def_path):
     with graph.as_default():
       _register_function_ops(CUSTOM_OP_FUNCTIONS)
-      graph_def = tf.GraphDef()
+      graph_def = tf.compat.v1.GraphDef()
       with gfile.GFile(graph_def_path, "rb") as file:
         text_format.Parse(file.read(), graph_def)
       tf.import_graph_def(graph_def, name="")
@@ -202,4 +202,4 @@ def main(_argv):
 
 
 if __name__ == '__main__':
-  tf.app.run()
+  tf.compat.v1.app.run()

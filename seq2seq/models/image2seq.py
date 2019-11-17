@@ -68,7 +68,7 @@ class Image2Seq(AttentionSeq2Seq):
     return encoder_fn(features["image"])
 
   def batch_size(self, features, _labels):
-    return tf.shape(features["image"])[0]
+    return tf.shape(input=features["image"])[0]
 
   def _preprocess(self, features, labels):
     """Model-specific preprocessing for features and labels:
@@ -106,8 +106,8 @@ class Image2Seq(AttentionSeq2Seq):
     # Look up the target ids in the vocabulary
     labels["target_ids"] = target_vocab_to_id.lookup(labels["target_tokens"])
 
-    labels["target_len"] = tf.to_int32(labels["target_len"])
-    tf.summary.histogram("target_len", tf.to_float(labels["target_len"]))
+    labels["target_len"] = tf.cast(labels["target_len"], dtype=tf.int32)
+    tf.compat.v1.summary.histogram("target_len", tf.cast(labels["target_len"], dtype=tf.float32))
 
     # Add to graph collection for later use
     graph_utils.add_dict_to_collection(features, "features")

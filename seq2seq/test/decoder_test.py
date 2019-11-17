@@ -51,7 +51,7 @@ class DecoderTests(object):
     raise NotImplementedError
 
   def test_with_fixed_inputs(self):
-    inputs = tf.random_normal(
+    inputs = tf.random.normal(
         [self.batch_size, self.sequence_length, self.input_depth])
     seq_length = tf.ones(self.batch_size, dtype=tf.int32) * self.sequence_length
 
@@ -65,7 +65,7 @@ class DecoderTests(object):
 
     #pylint: disable=E1101
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       decoder_output_ = sess.run(decoder_output)
 
     np.testing.assert_array_equal(
@@ -77,7 +77,7 @@ class DecoderTests(object):
     return decoder_output_
 
   def test_gradients(self):
-    inputs = tf.random_normal(
+    inputs = tf.random.normal(
         [self.batch_size, self.sequence_length, self.input_depth])
     seq_length = tf.ones(self.batch_size, dtype=tf.int32) * self.sequence_length
     labels = np.random.randint(0, self.vocab_size,
@@ -93,12 +93,12 @@ class DecoderTests(object):
 
     losses = tf.nn.sparse_softmax_cross_entropy_with_logits(
         logits=decoder_output.logits, labels=labels)
-    optimizer = tf.train.AdamOptimizer(learning_rate=0.001)
-    grads_and_vars = optimizer.compute_gradients(tf.reduce_mean(losses))
+    optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=0.001)
+    grads_and_vars = optimizer.compute_gradients(tf.reduce_mean(input_tensor=losses))
 
     #pylint: disable=E1101
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       grads_and_vars_ = sess.run(grads_and_vars)
 
     for grad, _ in grads_and_vars_:
@@ -107,7 +107,7 @@ class DecoderTests(object):
     return grads_and_vars_
 
   def test_with_dynamic_inputs(self):
-    embeddings = tf.get_variable("W_embed", [self.vocab_size, self.input_depth])
+    embeddings = tf.compat.v1.get_variable("W_embed", [self.vocab_size, self.input_depth])
 
     helper = decode_helper.GreedyEmbeddingHelper(
         embedding=embeddings, start_tokens=[0] * self.batch_size, end_token=-1)
@@ -119,7 +119,7 @@ class DecoderTests(object):
 
     #pylint: disable=E1101
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       decoder_output_ = sess.run(decoder_output)
 
     np.testing.assert_array_equal(
@@ -139,7 +139,7 @@ class DecoderTests(object):
         length_penalty_weight=0.6,
         choose_successors_fn=beam_search.choose_top_k)
 
-    embeddings = tf.get_variable("W_embed", [self.vocab_size, self.input_depth])
+    embeddings = tf.compat.v1.get_variable("W_embed", [self.vocab_size, self.input_depth])
 
     helper = decode_helper.GreedyEmbeddingHelper(
         embedding=embeddings,
@@ -156,7 +156,7 @@ class DecoderTests(object):
 
     #pylint: disable=E1101
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       decoder_output_ = sess.run(decoder_output)
 
     np.testing.assert_array_equal(
@@ -184,7 +184,7 @@ class BasicDecoderTest(tf.test.TestCase, DecoderTests):
 
   def setUp(self):
     tf.test.TestCase.setUp(self)
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
     DecoderTests.__init__(self)
 
   def create_decoder(self, helper, mode):
@@ -201,7 +201,7 @@ class AttentionDecoderTest(tf.test.TestCase, DecoderTests):
 
   def setUp(self):
     tf.test.TestCase.setUp(self)
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
     DecoderTests.__init__(self)
     self.attention_dim = 64
     self.input_seq_len = 10
@@ -211,10 +211,10 @@ class AttentionDecoderTest(tf.test.TestCase, DecoderTests):
         params={"num_units": self.attention_dim},
         mode=tf.contrib.learn.ModeKeys.TRAIN)
     attention_values = tf.convert_to_tensor(
-        np.random.randn(self.batch_size, self.input_seq_len, 32),
+        value=np.random.randn(self.batch_size, self.input_seq_len, 32),
         dtype=tf.float32)
     attention_keys = tf.convert_to_tensor(
-        np.random.randn(self.batch_size, self.input_seq_len, 32),
+        value=np.random.randn(self.batch_size, self.input_seq_len, 32),
         dtype=tf.float32)
     params = AttentionDecoder.default_params()
     params["max_decode_length"] = self.max_decode_length

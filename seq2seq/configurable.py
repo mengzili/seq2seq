@@ -133,8 +133,8 @@ class Configurable(object):
   def _print_params(self):
     """Logs parameter values"""
     classname = self.__class__.__name__
-    tf.logging.info("Creating %s in mode=%s", classname, self._mode)
-    tf.logging.info("\n%s", yaml.dump({classname: self._params}))
+    tf.compat.v1.logging.info("Creating %s in mode=%s", classname, self._mode)
+    tf.compat.v1.logging.info("\n%s", yaml.dump({classname: self._params}))
 
   @property
   def mode(self):

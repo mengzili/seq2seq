@@ -33,7 +33,7 @@ class VocabInfoTest(tf.test.TestCase):
 
   def setUp(self):
     super(VocabInfoTest, self).setUp()
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
     self.vocab_list = ["Hello", ".", "Bye"]
     self.vocab_file = test_utils.create_temporary_vocab_file(self.vocab_list)
 
@@ -66,18 +66,18 @@ class CreateVocabularyLookupTableTest(tf.test.TestCase):
     self.assertEqual(vocab_size, 6)
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      sess.run(tf.local_variables_initializer())
-      sess.run(tf.tables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
+      sess.run(tf.compat.v1.local_variables_initializer())
+      sess.run(tf.compat.v1.tables_initializer())
 
       ids = vocab_to_id_table.lookup(
-          tf.convert_to_tensor(["Hello", ".", "笑", "??", "xxx"]))
+          tf.convert_to_tensor(value=["Hello", ".", "笑", "??", "xxx"]))
       ids = sess.run(ids)
       np.testing.assert_array_equal(ids, [0, 1, 2, 3, 3])
 
       words = id_to_vocab_table.lookup(
           tf.convert_to_tensor(
-              [0, 1, 2, 3], dtype=tf.int64))
+              value=[0, 1, 2, 3], dtype=tf.int64))
       words = sess.run(words)
       np.testing.assert_array_equal(
           np.char.decode(words.astype("S"), "utf-8"),
@@ -95,25 +95,25 @@ class CreateVocabularyLookupTableTest(tf.test.TestCase):
     self.assertEqual(vocab_size, 6)
 
     with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      sess.run(tf.local_variables_initializer())
-      sess.run(tf.tables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
+      sess.run(tf.compat.v1.local_variables_initializer())
+      sess.run(tf.compat.v1.tables_initializer())
 
       ids = vocab_to_id_table.lookup(
-          tf.convert_to_tensor(["Hello", ".", "笑", "??", "xxx"]))
+          tf.convert_to_tensor(value=["Hello", ".", "笑", "??", "xxx"]))
       ids = sess.run(ids)
       np.testing.assert_array_equal(ids, [0, 1, 2, 3, 3])
 
       words = id_to_vocab_table.lookup(
           tf.convert_to_tensor(
-              [0, 1, 2, 3], dtype=tf.int64))
+              value=[0, 1, 2, 3], dtype=tf.int64))
       words = sess.run(words)
       np.testing.assert_array_equal(
           np.char.decode(words.astype("S"), "utf-8"),
           ["Hello", ".", "笑", "UNK"])
 
       counts = word_to_count_table.lookup(
-          tf.convert_to_tensor(["Hello", ".", "笑", "??", "xxx"]))
+          tf.convert_to_tensor(value=["Hello", ".", "笑", "??", "xxx"]))
       counts = sess.run(counts)
       np.testing.assert_array_equal(counts, [100, 200, 300, -1, -1])
 

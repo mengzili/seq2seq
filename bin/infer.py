@@ -105,18 +105,18 @@ def main(_argv):
       input_pipeline=input_pipeline_infer,
       batch_size=FLAGS.batch_size)
 
-  saver = tf.train.Saver()
+  saver = tf.compat.v1.train.Saver()
   checkpoint_path = FLAGS.checkpoint_path
   if not checkpoint_path:
     checkpoint_path = tf.train.latest_checkpoint(FLAGS.model_dir)
 
   def session_init_op(_scaffold, sess):
     saver.restore(sess, checkpoint_path)
-    tf.logging.info("Restored model from %s", checkpoint_path)
+    tf.compat.v1.logging.info("Restored model from %s", checkpoint_path)
 
-  scaffold = tf.train.Scaffold(init_fn=session_init_op)
-  session_creator = tf.train.ChiefSessionCreator(scaffold=scaffold)
-  with tf.train.MonitoredSession(
+  scaffold = tf.compat.v1.train.Scaffold(init_fn=session_init_op)
+  session_creator = tf.compat.v1.train.ChiefSessionCreator(scaffold=scaffold)
+  with tf.compat.v1.train.MonitoredSession(
       session_creator=session_creator,
       hooks=hooks) as sess:
 
@@ -125,5 +125,5 @@ def main(_argv):
       sess.run([])
 
 if __name__ == "__main__":
-  tf.logging.set_verbosity(tf.logging.INFO)
-  tf.app.run()
+  tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
+  tf.compat.v1.app.run()

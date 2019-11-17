@@ -41,7 +41,7 @@ class GraphModule(object):
       name: Name of this module. Used for `tf.make_template`.
     """
     self.name = name
-    self._template = tf.make_template(name, self._build, create_scope_now_=True)
+    self._template = tf.compat.v1.make_template(name, self._build, create_scope_now_=True)
     # Docstrings for the class should be the docstring for the _build method
     self.__doc__ = self._build.__doc__
     # pylint: disable=E1101
@@ -59,4 +59,4 @@ class GraphModule(object):
   def variable_scope(self):
     """Returns the proper variable scope for this module.
     """
-    return tf.variable_scope(self._template.variable_scope)
+    return tf.compat.v1.variable_scope(self._template.variable_scope)

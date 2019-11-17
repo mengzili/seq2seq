@@ -99,7 +99,7 @@ def create_vocabulary_lookup_table(filename, default_value=None):
   if default_value is None:
     default_value = special_vocab.UNK
 
-  tf.logging.info("Creating vocabulary lookup table of size %d", vocab_size)
+  tf.compat.v1.logging.info("Creating vocabulary lookup table of size %d", vocab_size)
 
   vocab_tensor = tf.constant(vocab)
   count_tensor = tf.constant(counts, dtype=tf.float32)

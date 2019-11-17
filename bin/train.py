@@ -234,12 +234,12 @@ def main(_argv):
       if not config_path:
         continue
       config_path = os.path.abspath(config_path)
-      tf.logging.info("Loading config from %s", config_path)
+      tf.compat.v1.logging.info("Loading config from %s", config_path)
       with gfile.GFile(config_path.strip()) as config_file:
         config_flags = yaml.load(config_file)
         final_config = _deep_merge_dict(final_config, config_flags)
 
-  tf.logging.info("Final Config:\n%s", yaml.dump(final_config))
+  tf.compat.v1.logging.info("Final Config:\n%s", yaml.dump(final_config))
 
   # Merge flags with config values
   for flag_key, flag_value in final_config.items():
@@ -249,12 +249,12 @@ def main(_argv):
     elif hasattr(FLAGS, flag_key):
       setattr(FLAGS, flag_key, flag_value)
     else:
-      tf.logging.warning("Ignoring config flag: %s", flag_key)
+      tf.compat.v1.logging.warning("Ignoring config flag: %s", flag_key)
 
   if FLAGS.save_checkpoints_secs is None \
     and FLAGS.save_checkpoints_steps is None:
     FLAGS.save_checkpoints_secs = 600
-    tf.logging.info("Setting save_checkpoints_secs to %d",
+    tf.compat.v1.logging.info("Setting save_checkpoints_secs to %d",
                     FLAGS.save_checkpoints_secs)
 
   if not FLAGS.output_dir:
@@ -273,5 +273,5 @@ def main(_argv):
 
 
 if __name__ == "__main__":
-  tf.logging.set_verbosity(tf.logging.INFO)
-  tf.app.run()
+  tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
+  tf.compat.v1.app.run()

@@ -32,7 +32,7 @@ class CrossEntropySequenceLossTest(tf.test.TestCase):
 
   def setUp(self):
     super(CrossEntropySequenceLossTest, self).setUp()
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
     self.batch_size = 4
     self.sequence_length = 10
     self.vocab_size = 50

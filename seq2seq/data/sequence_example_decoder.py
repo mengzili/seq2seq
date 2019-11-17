@@ -60,7 +60,7 @@ class TFSEquenceExampleDecoder(data_decoder.DataDecoder):
     Returns:
       the decoded items, a list of tensor.
     """
-    context, sequence = tf.parse_single_sequence_example(
+    context, sequence = tf.io.parse_single_sequence_example(
         serialized_example, self._context_keys_to_features,
         self._sequence_keys_to_features)
 
@@ -75,7 +75,7 @@ class TFSEquenceExampleDecoder(data_decoder.DataDecoder):
 
     # Reshape non-sparse elements just once:
     for k, value in all_features.items():
-      if isinstance(value, tf.FixedLenFeature):
+      if isinstance(value, tf.io.FixedLenFeature):
         example[k] = tf.reshape(example[k], value.shape)
 
     if not items:

@@ -201,13 +201,13 @@ def create_learning_rate_decay_fn(decay_type,
   if decay_type is None or decay_type == "":
     return None
 
-  start_decay_at = tf.to_int32(start_decay_at)
-  stop_decay_at = tf.to_int32(stop_decay_at)
+  start_decay_at = tf.cast(start_decay_at, dtype=tf.int32)
+  stop_decay_at = tf.cast(stop_decay_at, dtype=tf.int32)
 
   def decay_fn(learning_rate, global_step):
     """The computed learning rate decay function.
     """
-    global_step = tf.to_int32(global_step)
+    global_step = tf.cast(global_step, dtype=tf.int32)
 
     decay_type_fn = getattr(tf.train, decay_type)
     decayed_learning_rate = decay_type_fn(
@@ -218,7 +218,7 @@ def create_learning_rate_decay_fn(decay_type,
         staircase=staircase,
         name="decayed_learning_rate")
 
-    final_lr = tf.train.piecewise_constant(
+    final_lr = tf.compat.v1.train.piecewise_constant(
         x=global_step,
         boundaries=[start_decay_at],
         values=[learning_rate, decayed_learning_rate])
@@ -256,7 +256,7 @@ def create_input_fn(pipeline,
     """Creates features and labels.
     """
 
-    with tf.variable_scope(scope or "input_fn"):
+    with tf.compat.v1.variable_scope(scope or "input_fn"):
       data_provider = pipeline.make_data_provider()
       features_and_labels = pipeline.read_from_data_provider(data_provider)
 
@@ -272,7 +272,7 @@ def create_input_fn(pipeline,
             allow_smaller_final_batch=allow_smaller_final_batch,
             name="bucket_queue")
       else:
-        batch = tf.train.batch(
+        batch = tf.compat.v1.train.batch(
             tensors=features_and_labels,
             enqueue_many=False,
             batch_size=batch_size,

@@ -77,7 +77,7 @@ class RNNDecoder(Decoder, GraphModule, Configurable):
 
   @property
   def batch_size(self):
-    return tf.shape(nest.flatten([self.initial_state])[0])[0]
+    return tf.shape(input=nest.flatten([self.initial_state])[0])[0]
 
   def _setup(self, initial_state, helper):
     """Sets the initial state and helper for the decoder.
@@ -104,8 +104,8 @@ class RNNDecoder(Decoder, GraphModule, Configurable):
     if not self.initial_state:
       self._setup(initial_state, helper)
 
-    scope = tf.get_variable_scope()
-    scope.set_initializer(tf.random_uniform_initializer(
+    scope = tf.compat.v1.get_variable_scope()
+    scope.set_initializer(tf.compat.v1.random_uniform_initializer(
         -self.params["init_scale"],
         self.params["init_scale"]))
 

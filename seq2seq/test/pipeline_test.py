@@ -74,7 +74,7 @@ class PipelineTest(tf.test.TestCase):
     vocab_target = test_utils.create_temporary_vocab_file(["a", "b", "c", "泣"])
 
     _clear_flags()
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
     train_script = imp.load_source("seq2seq.test.train_bin",
                                    os.path.join(BIN_FOLDER, "train.py"))
 
@@ -144,7 +144,7 @@ class PipelineTest(tf.test.TestCase):
     tf.app.flags.FLAGS.config_paths = config_path
 
     # Run training
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
     train_script.main([])
 
     # Make sure a checkpoint was written
@@ -154,7 +154,7 @@ class PipelineTest(tf.test.TestCase):
 
     # Reset flags and import inference script
     _clear_flags()
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
     infer_script = imp.load_source("seq2seq.test.infer_bin",
                                    os.path.join(BIN_FOLDER, "infer.py"))
 
@@ -202,7 +202,7 @@ class PipelineTest(tf.test.TestCase):
 
     # Test inference with beam search
     _clear_flags()
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
     infer_script = imp.load_source("seq2seq.test.infer_bin",
                                    os.path.join(BIN_FOLDER, "infer.py"))
 
